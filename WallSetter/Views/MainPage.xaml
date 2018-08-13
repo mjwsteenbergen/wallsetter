@@ -1,0 +1,73 @@
+﻿<Page
+    x:Class="WallSetter.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Style="{StaticResource PageStyle}"
+    mc:Ignorable="d">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Loaded="FrameworkElement_OnLoaded">
+        <Image Stretch="UniformToFill" Source="https://source.unsplash.com/random/1920x1080"></Image>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+
+            <Grid HorizontalAlignment="Center" Grid.Column="0" Grid.Row="1">
+                <StackPanel HorizontalAlignment="Center">
+                    <Button HorizontalAlignment="Center" Margin="10" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ChangeWallpaper">Change background</Button>
+                    <Button Margin="10" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ChangeLockscreen">Change Lockscreen</Button>
+                    <Button Margin="10" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="DeleteData">Delete All My Data</Button>
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0" Grid.Column="0" Grid.Row="2" Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
+                <StackPanel Margin="20" Width="Auto"  VerticalAlignment="Center" >
+                    <TextBlock Margin="0,10" Text="Settings" Style="{ThemeResource FlyoutPickerTitleTextBlockStyle}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <Grid  Height="40" >
+                                <TextBlock Text="Unsplash" VerticalAlignment="Center" Margin="5,0"/>
+                            </Grid>
+                            <TextBox Margin="5" x:Name="unsplashLs" PlaceholderText="Lockscreen Url. Keep empty for default" TextChanged="Codebox_Changed"></TextBox>
+                            <TextBox Margin="5" x:Name="unsplashWp" PlaceholderText="Wallpaper Url. Keep empty for default" TextChanged="Codebox_Changed"></TextBox>
+                            <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ConnectToTrakt_Click">Set Default</Button>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <StackPanel Orientation="Horizontal" Height="40">
+                                <TextBlock Margin="5,0" VerticalAlignment="Center" Text="Trakt"/>
+                                <ToggleSwitch x:Name="LockscreenShowsToggle" Toggled="LockScreenShowsEnabled"/>
+                            </StackPanel>
+                            <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktId" PlaceholderText="Trakt Id" PasswordChanged="Codebox_Changed"></PasswordBox>
+                            <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktSecret" PlaceholderText="Trakt Secret" PasswordChanged="Codebox_Changed"></PasswordBox>
+                            <TextBox Margin="5" x:Name="traktRedirectUrl" PlaceholderText="Trakt Redirect Url" TextChanged="Codebox_Changed"></TextBox>
+                            <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktAcessCode" PlaceholderText="AccessCode here" PasswordChanged="Codebox_Changed"></PasswordBox>
+                            <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" x:Name="ConnectToTrakt"  Click="ConnectToTrakt_Click">Get TraktCredentials</Button>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <Grid  Height="40" >
+                                <TextBlock Text="FanArt" VerticalAlignment="Center" Margin="5,0"/>
+                            </Grid>
+                            <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="fanartId" PlaceholderText="Fanart Project Id" PasswordChanged="Codebox_Changed"></PasswordBox>
+                            <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="fanartSecret" PlaceholderText="Fanart Project Secret" PasswordChanged="Codebox_Changed"></PasswordBox>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+            
+        </Grid>
+        <TextBlock Margin="50" Style="{ThemeResource PageTitleStyle}" VerticalAlignment="Top">Wallsetter</TextBlock>
+       
+    </Grid>
+</Page>
