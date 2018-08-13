@@ -20,7 +20,81 @@ namespace WallSetter.Views
     {
         private TraktApi trakt;
         private PasswordVault vault;
-        List<Control> controls = new List<Control>();
+
+        public string unsplashLs
+        {
+            get => GetFromDictionary(nameof(unsplashLs));
+            set
+            {
+                secrets[nameof(unsplashLs)] = value;
+                WritePasswords();
+            }
+        }
+        public string unsplashWp
+        {
+            get => GetFromDictionary(nameof(unsplashWp));
+            set
+            {
+                secrets[nameof(unsplashWp)] = value;
+                WritePasswords();
+            }
+        }
+        public string traktId
+        {
+            get => GetFromDictionary(nameof(traktId));
+            set
+            {
+                secrets[nameof(traktId)] = value;
+                WritePasswords();
+            }
+        }
+        public string traktSecret
+        {
+            get => GetFromDictionary(nameof(traktSecret));
+            set
+            {
+                secrets[nameof(traktSecret)] = value;
+                WritePasswords();
+            }
+        }
+        public string traktRedirectUrl
+        {
+            get => GetFromDictionary(nameof(traktRedirectUrl));
+            set
+            {
+                secrets[nameof(traktRedirectUrl)] = value;
+                WritePasswords();
+            }
+        }
+        public string fanartId
+        {
+            get => GetFromDictionary(nameof(fanartId));
+            set
+            {
+                secrets[nameof(fanartId)] = value;
+                WritePasswords();
+            }
+        }
+        public string fanartSecret
+        {
+            get => GetFromDictionary(nameof(fanartSecret));
+            set
+            {
+                secrets[nameof(fanartSecret)] = value;
+                WritePasswords();
+            }
+        }
+        public bool LockscreenShowsToggle
+        {
+            get => ParseOrFalse(GetFromDictionary(nameof(LockscreenShowsToggle)));
+            set
+            {
+                secrets[nameof(LockscreenShowsToggle)] = value.ToString();
+                WritePasswords();
+            }
+        }
+
+        Dictionary<string, string> secrets = new Dictionary<string, string>(); 
 
         public MainPage()
         {
@@ -42,60 +116,56 @@ namespace WallSetter.Views
 
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        private void WritePasswords()
+        {
+            foreach (KeyValuePair<string, string> secret in secrets)
+            {
+                if (secret.Value == "")
+                {
+                    var cred = vault.RetrieveAll().FirstOrDefault(i => i.UserName == secret.Key);
+                    if (cred != null)
+                    {
+                        vault.Remove(cred);
+                    }
+                }
+                else
+                {
+                    vault.Add(new PasswordCredential("wallsetter", secret.Key, secret.Value));
+                }
+            }
+        }
+
+        private bool ParseOrFalse(string input)
+        {
+            bool.TryParse(input, out bool ret);
+            return ret;
+        }
+
+        private string GetFromDictionary(string name)
+        {
+            if (secrets == null)
+            {
+                return "";
+            }
+
+            return secrets.FirstOrDefault(i => i.Key == name).Value ?? "";
+        }
+
         private void FrameworkElement_OnLoaded(object sender, RoutedEventArgs e)
         {
             var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
             coreTitleBar.ExtendViewIntoTitleBar = true;
             vault = new PasswordVault();
 
-            controls.Add(unsplashLs);
-            controls.Add(unsplashWp);
-            controls.Add(traktId);
-            controls.Add(traktSecret);
-            controls.Add(traktRedirectUrl);
-            controls.Add(fanartId);
-            controls.Add(fanartSecret);
-            controls.Add(LockscreenShowsToggle);
-
             var logins = vault.RetrieveAll();
-            UpdateEnable(false);
 
             foreach (PasswordCredential credential in logins)
             {
                 credential.RetrievePassword();
-                if (credential.UserName == "LockscreenShowsToggle")
-                {
-                    bool enableTrakt = bool.Parse(credential.Password);
-                    UpdateEnable(enableTrakt);
-                    LockscreenShowsToggle.IsOn = enableTrakt;
-                }
-                foreach (Control control in controls)
-                {
-                    if(control.Name != credential.UserName)
-                        continue;
-
-                    if (control is PasswordBox)
-                    {
-                        (control as PasswordBox).Password = credential.Password;
-                    }
-                    if (control is TextBox)
-                    {
-                        (control as TextBox).Text = credential.Password;
-                    }
-
-                }
+                secrets.Add(credential.UserName, credential.Password);
+                OnPropertyChanged(credential.UserName);
             }
-            trakt = new TraktApi(traktRedirectUrl.Text, traktId.Password, traktSecret.Password);
-        }
-
-        private void UpdateEnable(bool enableTrakt)
-        {
-            traktId.IsEnabled = enableTrakt;
-            traktSecret.IsEnabled = enableTrakt;
-            traktAcessCode.IsEnabled = enableTrakt;
-            fanartId.IsEnabled = enableTrakt;
-            fanartSecret.IsEnabled = enableTrakt;
-            ConnectToTrakt.IsEnabled = enableTrakt;
+            trakt = new TraktApi(traktRedirectUrl, traktId, traktSecret);
         }
 
         private async void ChangeWallpaper(object sender, RoutedEventArgs e)
@@ -121,93 +191,20 @@ namespace WallSetter.Views
             vault.RetrieveAll().ToList().ForEach(i => vault.Remove(i));
         }
 
-        private async void Codebox_Changed(object sender, RoutedEventArgs routedEventArgs)
-        {
-            if ((sender as Control)?.Name == "traktAcessCode")
-            {
-                var res = await trakt.Connect(traktAcessCode.Password);
-                vault.Add(new PasswordCredential("wallsetter", "traktRefreshToken", res.RefreshToken));
-                vault.Add(new PasswordCredential("wallsetter", "traktAccessToken", res.AccessToken));
-                return;
-            }
-
-            await Set(sender);
-        }
-
-
-        private async Task Set(object sender)
-        {
-            if (controls.Any(i => i.Name == (sender as Control)?.Name))
-            {
-                if (sender is TextBox || sender is PasswordBox)
-                {
-                    string name;
-                    string text;
-                    if (sender is TextBox)
-                    {
-                        TextBox textBox = (sender as TextBox);
-                        name = textBox.Name;
-                        text = textBox.Text;
-                    }
-                    else
-                    {
-                        PasswordBox textBox = (sender as PasswordBox);
-                        name = textBox.Name;
-                        text = textBox.Password;
-                    }
-                    if (text == "")
-                    {
-                        var cred = vault.RetrieveAll().FirstOrDefault(i => i.UserName == name);
-                        if (cred != null)
-                        {
-                            vault.Remove(cred);
-                        }
-                    }
-                    else
-                    {
-                        vault.Add(new PasswordCredential("wallsetter", name, text));
-                    }
-                }
-                if (sender is ToggleSwitch)
-                {
-                    vault.Add(new PasswordCredential("wallsetter", (sender as ToggleSwitch).Name, (sender as ToggleSwitch).IsOn.ToString()));
-                }
-                trakt = new TraktApi(traktRedirectUrl.Text, traktId.Password, traktSecret.Password);
-            }
-            else
-            {
-                await new MessageDialog("This type I do not know how to adapt to").ShowAsync();
-            }
-        }
-
-
         private async void ChangeLockscreen(object sender, RoutedEventArgs e)
         {
             await Lockscreen.SetNew();
         }
 
-        private async void LockScreenShowsEnabled(object sender, RoutedEventArgs routedEventArgs)
+        private void OnToggle(object sender, RoutedEventArgs e)
         {
-            UpdateEnable((sender as ToggleSwitch).IsOn);
-            await Set(sender);
-        }
-    }
-
-    internal static class Shuffler
-    {
-        private static Random rng = new Random();
-
-        public static void Shuffle<T>(this IList<T> list)
-        {
-            int n = list.Count;
-            while (n > 1)
+            ToggleSwitch ts = (sender as ToggleSwitch);
+            if (ts.FocusState == FocusState.Unfocused)
             {
-                n--;
-                int k = rng.Next(n + 1);
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
+                return;
             }
+            LockscreenShowsToggle = ts.IsOn;
+            OnPropertyChanged(nameof(LockscreenShowsToggle));
         }
     }
 }

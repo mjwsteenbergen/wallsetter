@@ -49,10 +49,10 @@
                     </Grid>
 
                 </StackPanel>
-                <controls:Expander x:Name="Expander1"  VerticalAlignment="Top"
+                <controls:Expander VerticalAlignment="Top"
                                Header="Advanced Settings"
                                HorizontalContentAlignment="Stretch"
-                               IsExpanded="False"
+                               IsExpanded="True"
                                Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                                ExpandDirection="Up">
                     <StackPanel Margin="20" Width="Auto"  VerticalAlignment="Center" >
@@ -67,37 +67,37 @@
                                 <Grid  Height="40" >
                                     <TextBlock Text="Unsplash" VerticalAlignment="Center" Margin="5,0"/>
                                 </Grid>
-                                <TextBox Margin="5" x:Name="unsplashLs" PlaceholderText="Lockscreen Url. Keep empty for default" TextChanged="Codebox_Changed"></TextBox>
-                                <TextBox Margin="5" x:Name="unsplashWp" PlaceholderText="Wallpaper Url. Keep empty for default" TextChanged="Codebox_Changed"></TextBox>
+                                <TextBox Margin="5" Text="{x:Bind unsplashLs}" PlaceholderText="Lockscreen Url. Keep empty for default" ></TextBox>
+                                <TextBox Margin="5" Text="{x:Bind unsplashWp}" PlaceholderText="Wallpaper Url. Keep empty for default" ></TextBox>
                                 <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ConnectToTrakt_Click">Set Default</Button>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <StackPanel Orientation="Horizontal" Height="40">
                                     <TextBlock Margin="5,0" VerticalAlignment="Center" Text="Trakt"/>
-                                    <ToggleSwitch x:Name="LockscreenShowsToggle" Toggled="LockScreenShowsEnabled"/>
+                                    <ToggleSwitch IsOn="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Toggled="OnToggle"/>
                                 </StackPanel>
-                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktId" PlaceholderText="Trakt Id" PasswordChanged="Codebox_Changed"></PasswordBox>
-                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktSecret" PlaceholderText="Trakt Secret" PasswordChanged="Codebox_Changed"></PasswordBox>
-                                <TextBox Margin="5" x:Name="traktRedirectUrl" PlaceholderText="Trakt Redirect Url" TextChanged="Codebox_Changed"></TextBox>
-                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktAcessCode" PlaceholderText="AccessCode here" PasswordChanged="Codebox_Changed"></PasswordBox>
-                                <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" x:Name="ConnectToTrakt"  Click="ConnectToTrakt_Click">Get TraktCredentials</Button>
+                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktId, Mode=TwoWay}" PlaceholderText="Trakt Id"></TextBox>
+                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktSecret, Mode=TwoWay}" PlaceholderText="Trakt Secret"></TextBox>
+                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktRedirectUrl, Mode=TwoWay}" PlaceholderText="Trakt Redirect Url" ></TextBox>
+                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktAcessCode" PlaceholderText="AccessCode here" ></PasswordBox>
+                                <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" IsEnabled="{x:Bind LockscreenShowsToggle}"  Click="ConnectToTrakt_Click">Get TraktCredentials</Button>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <Grid  Height="40" >
                                     <TextBlock Text="FanArt" VerticalAlignment="Center" Margin="5,0"/>
                                 </Grid>
-                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="fanartId" PlaceholderText="Fanart Project Id" PasswordChanged="Codebox_Changed"></PasswordBox>
-                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="fanartSecret" PlaceholderText="Fanart Project Secret" PasswordChanged="Codebox_Changed"></PasswordBox>
+                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartId, Mode=TwoWay}" PlaceholderText="Fanart Project Id"></TextBox>
+                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartSecret, Mode=TwoWay}" PlaceholderText="Fanart Project Secret"></TextBox>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
                 </controls:Expander>
             </StackPanel>
-            
-            
-            
+
+
+
         </Grid>
         <TextBlock Margin="50" Style="{ThemeResource PageTitleStyle}" VerticalAlignment="Top">Wallsetter</TextBlock>
-       
+
     </Grid>
 </Page>
