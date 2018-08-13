@@ -4,10 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.UserDataTasks;
+using Windows.Foundation;
+using Windows.Graphics.Display;
 using Windows.Security.Credentials;
 using Windows.Storage;
 using Windows.System.UserProfile;
+using Windows.UI.ViewManagement;
 using Windows.Web.Http;
+using WallSetter.Helpers;
+using WallSetter.Views;
 
 namespace Wallsetter
 {
@@ -38,9 +43,26 @@ namespace Wallsetter
             await Clean();
 
             PasswordVault vault = new PasswordVault();
-            var wpCredential = vault.RetrieveAll().FirstOrDefault(i => i.UserName == "unsplashWp");
-            wpCredential?.RetrievePassword();
-            var url = wpCredential?.Password ?? "https://source.unsplash.com/featured/1920x1080/";
+            
+
+            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+
+            var url = HelperMethods.GetValueFromVault(vault, "unsplashWp");
+
+            if (url == null)
+            {
+                url = $"https://source.unsplash.com/{size.Width.ToString("####")}x{size.Height.ToString("####")}/";
+                bool BaseImageOnTimeOfDay =
+                    HelperMethods.ParseOrFalse(HelperMethods.GetValueFromVault(vault, nameof(BaseImageOnTimeOfDay)));
+
+                if (BaseImageOnTimeOfDay)
+                {
+                    url += HelperMethods.GetSearchQueryBasedOnTimeOfDay();
+                }
+            }
+
             var storage = await DownloadWallpaper(url, DateTime.Today.ToString("t").Replace(':', '-') + ".jpg");
             await SetWallpaper(storage);
         }

@@ -35,18 +35,15 @@
             </Grid>
 
             <StackPanel Grid.Column="0" Grid.Row="2">
-                <StackPanel Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
-                    <TextBlock Margin="20,40" Text="Settings" Style="{ThemeResource FlyoutPickerTitleTextBlockStyle}"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel>
-
-                        </StackPanel>
-                    </Grid>
+                <StackPanel Padding="20" Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
+                    <TextBlock Margin="0,10" Text="Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                    <StackPanel>
+                        <TextBlock Text="Change wallpaper based on the time of day"/>
+                        <ToggleSwitch IsOn="{x:Bind BaseImageOnTimeOfDay, Mode=OneWay}" Toggled="OnToggleBoTOD"/>
+                        <TextBlock Margin="0,20" Style="{ThemeResource SubtitleTextBlockStyle}" Text="Search"/>
+                        <TextBox Margin="5" PlaceholderText="Search tags for lock screen" MinWidth="200" HorizontalAlignment="Left"/>
+                        <TextBox Margin="5" PlaceholderText="Search tags for wallpaper" MinWidth="200" HorizontalAlignment="Left"/>
+                    </StackPanel>
 
                 </StackPanel>
                 <controls:Expander VerticalAlignment="Top"
@@ -56,7 +53,7 @@
                                Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                                ExpandDirection="Up">
                     <StackPanel Margin="20" Width="Auto"  VerticalAlignment="Center" >
-                        <TextBlock Margin="0,10" Text="Advanced Settings" Style="{ThemeResource FlyoutPickerTitleTextBlockStyle}"/>
+                        <TextBlock Margin="0,10" Text="Advanced Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -67,8 +64,8 @@
                                 <Grid  Height="40" >
                                     <TextBlock Text="Unsplash" VerticalAlignment="Center" Margin="5,0"/>
                                 </Grid>
-                                <TextBox Margin="5" Text="{x:Bind unsplashLs}" PlaceholderText="Lockscreen Url. Keep empty for default" ></TextBox>
-                                <TextBox Margin="5" Text="{x:Bind unsplashWp}" PlaceholderText="Wallpaper Url. Keep empty for default" ></TextBox>
+                                <TextBox Margin="5" Text="{x:Bind unsplashLs, Mode=TwoWay}" PlaceholderText="Lockscreen Url. Keep empty for default" ></TextBox>
+                                <TextBox Margin="5" Text="{x:Bind unsplashWp, Mode=TwoWay}" PlaceholderText="Wallpaper Url. Keep empty for default" ></TextBox>
                                 <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ConnectToTrakt_Click">Set Default</Button>
                             </StackPanel>
                             <StackPanel Grid.Column="1">

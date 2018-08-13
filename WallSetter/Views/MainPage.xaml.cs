@@ -12,6 +12,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using TraktApiSharp.Exceptions;
 using Wallsetter;
+using WallSetter.Helpers;
 using Control = Windows.UI.Xaml.Controls.Control;
 
 namespace WallSetter.Views
@@ -86,10 +87,19 @@ namespace WallSetter.Views
         }
         public bool LockscreenShowsToggle
         {
-            get => ParseOrFalse(GetFromDictionary(nameof(LockscreenShowsToggle)));
+            get => HelperMethods.ParseOrFalse(GetFromDictionary(nameof(LockscreenShowsToggle)));
             set
             {
                 secrets[nameof(LockscreenShowsToggle)] = value.ToString();
+                WritePasswords();
+            }
+        }
+        public bool BaseImageOnTimeOfDay
+        {
+            get => HelperMethods.ParseOrFalse(GetFromDictionary(nameof(BaseImageOnTimeOfDay)));
+            set
+            {
+                secrets[nameof(BaseImageOnTimeOfDay)] = value.ToString();
                 WritePasswords();
             }
         }
@@ -133,12 +143,6 @@ namespace WallSetter.Views
                     vault.Add(new PasswordCredential("wallsetter", secret.Key, secret.Value));
                 }
             }
-        }
-
-        private bool ParseOrFalse(string input)
-        {
-            bool.TryParse(input, out bool ret);
-            return ret;
         }
 
         private string GetFromDictionary(string name)
@@ -205,6 +209,17 @@ namespace WallSetter.Views
             }
             LockscreenShowsToggle = ts.IsOn;
             OnPropertyChanged(nameof(LockscreenShowsToggle));
+        }
+
+        private void OnToggleBoTOD(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch ts = (sender as ToggleSwitch);
+            if (ts.FocusState == FocusState.Unfocused)
+            {
+                return;
+            }
+            BaseImageOnTimeOfDay = ts.IsOn;
+            OnPropertyChanged(nameof(BaseImageOnTimeOfDay));
         }
     }
 }

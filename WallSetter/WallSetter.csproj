@@ -127,6 +127,7 @@
     <Compile Include="BackgroundTasks\BackgroundTask.cs" />
     <Compile Include="BackgroundTasks\UpdateWallpaper.cs" />
     <Compile Include="FanArt.cs" />
+    <Compile Include="Helpers\HelperMethods.cs" />
     <Compile Include="Helpers\TaskExtensions.cs" />
     <Compile Include="Lockscreen.cs" />
     <Compile Include="Services\ActivationService.cs" />
