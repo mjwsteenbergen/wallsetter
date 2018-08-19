@@ -13,8 +13,8 @@
         </Style>
     </Page.Resources>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Loaded="FrameworkElement_OnLoaded">
-        <Image Stretch="UniformToFill" Source="https://source.unsplash.com/random/1920x1080"></Image>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Image Stretch="UniformToFill" Source="{x:Bind DefaultImageUrl}"></Image>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -34,25 +34,34 @@
                 </StackPanel>
             </Grid>
 
-            <StackPanel Grid.Column="0" Grid.Row="2">
-                <StackPanel Padding="20" Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
-                    <TextBlock Margin="0,10" Text="Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                    <StackPanel>
+            <StackPanel Grid.Column="0" Grid.Row="2" Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
+                <TextBlock Padding="40,40,0,0" Margin="0,10" Text="Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                <Grid Padding="40,0,40,40" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel >
+                        <TextBlock Margin="0,20" Style="{ThemeResource SubtitleTextBlockStyle}" Text="Wallpaper"/>
                         <TextBlock Text="Change wallpaper based on the time of day"/>
                         <ToggleSwitch IsOn="{x:Bind BaseImageOnTimeOfDay, Mode=OneWay}" Toggled="OnToggleBoTOD"/>
-                        <TextBlock Margin="0,20" Style="{ThemeResource SubtitleTextBlockStyle}" Text="Search"/>
-                        <TextBox Margin="5" PlaceholderText="Search tags for lock screen" MinWidth="200" HorizontalAlignment="Left"/>
-                        <TextBox Margin="5" PlaceholderText="Search tags for wallpaper" MinWidth="200" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Only use featured images"/>
+                        <ToggleSwitch IsOn="{x:Bind UseFeaturedImagesOnly, Mode=OneWay}" Toggled="OnToggleFIO"/>
                     </StackPanel>
-
-                </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Margin="0,20" Style="{ThemeResource SubtitleTextBlockStyle}" Text="Search"/>
+                        <TextBox Margin="5" Text="{x:Bind LockscreenSearchTags, Mode=TwoWay}" PlaceholderText="Search tags for lock screen" MinWidth="200" HorizontalAlignment="Left"/>
+                        <TextBox Margin="5" Text="{x:Bind WallpaperSearchTags, Mode=TwoWay}" PlaceholderText="Search tags for wallpaper" MinWidth="200" HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Grid>
                 <controls:Expander VerticalAlignment="Top"
                                Header="Advanced Settings"
                                HorizontalContentAlignment="Stretch"
-                               IsExpanded="True"
+                               IsExpanded="False"
                                Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
                                ExpandDirection="Up">
-                    <StackPanel Margin="20" Width="Auto"  VerticalAlignment="Center" >
+                    <StackPanel Margin="40" Width="Auto"  VerticalAlignment="Center" >
                         <TextBlock Margin="0,10" Text="Advanced Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -62,15 +71,15 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
                                 <Grid  Height="40" >
-                                    <TextBlock Text="Unsplash" VerticalAlignment="Center" Margin="5,0"/>
+                                    <TextBlock Text="Unsplash" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
                                 </Grid>
-                                <TextBox Margin="5" Text="{x:Bind unsplashLs, Mode=TwoWay}" PlaceholderText="Lockscreen Url. Keep empty for default" ></TextBox>
-                                <TextBox Margin="5" Text="{x:Bind unsplashWp, Mode=TwoWay}" PlaceholderText="Wallpaper Url. Keep empty for default" ></TextBox>
-                                <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ConnectToTrakt_Click">Set Default</Button>
+                                <TextBox Margin="0,5" Text="{x:Bind LockscreenUrl, Mode=TwoWay}" PlaceholderText="Lockscreen Url. Keep empty for default" ></TextBox>
+                                <TextBox Margin="0,5" Text="{x:Bind WallpaperUrl, Mode=TwoWay}" PlaceholderText="Wallpaper Url. Keep empty for default" ></TextBox>
+                                <Button Margin="0,5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ConnectToTrakt_Click">Set Default</Button>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
                                 <StackPanel Orientation="Horizontal" Height="40">
-                                    <TextBlock Margin="5,0" VerticalAlignment="Center" Text="Trakt"/>
+                                    <TextBlock Margin="5,0" VerticalAlignment="Center" Text="Trakt" Style="{StaticResource SubtitleTextBlockStyle}"/>
                                     <ToggleSwitch IsOn="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Toggled="OnToggle"/>
                                 </StackPanel>
                                 <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktId, Mode=TwoWay}" PlaceholderText="Trakt Id"></TextBox>
@@ -81,10 +90,10 @@
                             </StackPanel>
                             <StackPanel Grid.Column="2">
                                 <Grid  Height="40" >
-                                    <TextBlock Text="FanArt" VerticalAlignment="Center" Margin="5,0"/>
+                                    <TextBlock Text="FanArt" VerticalAlignment="Center" Margin="5,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
                                 </Grid>
-                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartId, Mode=TwoWay}" PlaceholderText="Fanart Project Id"></TextBox>
-                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartSecret, Mode=TwoWay}" PlaceholderText="Fanart Project Secret"></TextBox>
+                                <TextBox Margin="0,5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartId, Mode=TwoWay}" PlaceholderText="Fanart Project Id"></TextBox>
+                                <TextBox Margin="0,5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartSecret, Mode=TwoWay}" PlaceholderText="Fanart Project Secret"></TextBox>
                             </StackPanel>
                         </Grid>
                     </StackPanel>

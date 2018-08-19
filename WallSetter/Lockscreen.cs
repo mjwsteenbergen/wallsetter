@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Windows.Security.Credentials;
 using TraktApiSharp.Objects.Get.Calendars;
 using Wallsetter;
+using WallSetter.Helpers;
 using WallSetter.Views;
 
 namespace WallSetter
@@ -73,7 +74,7 @@ namespace WallSetter
                     }
                     else
                     {
-                            await RegularLockscreen();
+                        await RegularLockscreen();
                     }
                 }
                 catch (Exception ex)
@@ -90,9 +91,8 @@ namespace WallSetter
         private static async Task RegularLockscreen()
         {
             PasswordVault vault = new PasswordVault();
-            var ls = vault.RetrieveAll().FirstOrDefault(i => i.UserName == "unsplashLs");
-            ls?.RetrievePassword();
-            var url = ls?.Password ?? "https://source.unsplash.com/1920x1080/?lock";
+
+            var url = HelperMethods.GetValueFromVault(vault, "LockscreenUrl") ?? HelperMethods.GetDefaultImageUrl(vault, HelperMethods.GetValueFromVault(vault, "LockscreenSearchTags"));
 
             var file = await Wallpaper.DownloadWallpaper(url,
                 DateTime.Now.Hour + "" + DateTime.Now.Millisecond + "-lock.jpg");

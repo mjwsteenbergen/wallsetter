@@ -22,24 +22,45 @@ namespace WallSetter.Views
         private TraktApi trakt;
         private PasswordVault vault;
 
-        public string unsplashLs
+        public string DefaultImageUrl => HelperMethods.GetDefaultImageUrl(vault, HelperMethods.GetValueFromVault(vault, "LockscreenSearchTags"));
+        public string LockscreenUrl
         {
-            get => GetFromDictionary(nameof(unsplashLs));
+            get => GetFromDictionary(nameof(LockscreenUrl));
             set
             {
-                secrets[nameof(unsplashLs)] = value;
+                secrets[nameof(LockscreenUrl)] = value;
                 WritePasswords();
             }
         }
-        public string unsplashWp
+        public string WallpaperUrl
         {
-            get => GetFromDictionary(nameof(unsplashWp));
+            get => GetFromDictionary(nameof(WallpaperUrl));
             set
             {
-                secrets[nameof(unsplashWp)] = value;
+                secrets[nameof(WallpaperUrl)] = value;
                 WritePasswords();
             }
         }
+
+        public string LockscreenSearchTags
+        {
+            get => GetFromDictionary(nameof(LockscreenSearchTags));
+            set
+            {
+                secrets[nameof(LockscreenSearchTags)] = value;
+                WritePasswords();
+            }
+        }
+        public string WallpaperSearchTags
+        {
+            get => GetFromDictionary(nameof(WallpaperSearchTags));
+            set
+            {
+                secrets[nameof(WallpaperSearchTags)] = value;
+                WritePasswords();
+            }
+        }
+
         public string traktId
         {
             get => GetFromDictionary(nameof(traktId));
@@ -104,11 +125,34 @@ namespace WallSetter.Views
             }
         }
 
+        public bool UseFeaturedImagesOnly
+        {
+            get => HelperMethods.ParseOrFalse(GetFromDictionary(nameof(UseFeaturedImagesOnly)));
+            set
+            {
+                secrets[nameof(UseFeaturedImagesOnly)] = value.ToString();
+                WritePasswords();
+            }
+        }
+
         Dictionary<string, string> secrets = new Dictionary<string, string>(); 
 
         public MainPage()
         {
             InitializeComponent();
+            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+            vault = new PasswordVault();
+
+            var logins = vault.RetrieveAll();
+
+            foreach (PasswordCredential credential in logins)
+            {
+                credential.RetrievePassword();
+                secrets.Add(credential.UserName, credential.Password);
+                OnPropertyChanged(credential.UserName);
+            }
+            trakt = new TraktApi(traktRedirectUrl, traktId, traktSecret);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -153,23 +197,6 @@ namespace WallSetter.Views
             }
 
             return secrets.FirstOrDefault(i => i.Key == name).Value ?? "";
-        }
-
-        private void FrameworkElement_OnLoaded(object sender, RoutedEventArgs e)
-        {
-            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
-            coreTitleBar.ExtendViewIntoTitleBar = true;
-            vault = new PasswordVault();
-
-            var logins = vault.RetrieveAll();
-
-            foreach (PasswordCredential credential in logins)
-            {
-                credential.RetrievePassword();
-                secrets.Add(credential.UserName, credential.Password);
-                OnPropertyChanged(credential.UserName);
-            }
-            trakt = new TraktApi(traktRedirectUrl, traktId, traktSecret);
         }
 
         private async void ChangeWallpaper(object sender, RoutedEventArgs e)
@@ -220,6 +247,17 @@ namespace WallSetter.Views
             }
             BaseImageOnTimeOfDay = ts.IsOn;
             OnPropertyChanged(nameof(BaseImageOnTimeOfDay));
+        }
+
+        private void OnToggleFIO(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitch ts = (sender as ToggleSwitch);
+            if (ts.FocusState == FocusState.Unfocused)
+            {
+                return;
+            }
+            UseFeaturedImagesOnly = ts.IsOn;
+            OnPropertyChanged(nameof(UseFeaturedImagesOnly));
         }
     }
 }

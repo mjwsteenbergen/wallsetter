@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.Graphics.Display;
 using Windows.Security.Credentials;
+using Windows.UI.ViewManagement;
 
 namespace WallSetter.Helpers
 {
@@ -41,6 +44,38 @@ namespace WallSetter.Helpers
             }
 
             return "";
+        }
+
+
+        public static string GetDefaultImageUrl(PasswordVault vault, string searchTerms)
+        {
+            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+
+            var UseFeaturedImagesOnly = HelperMethods.ParseOrFalse(HelperMethods.GetValueFromVault(vault, "UseFeaturedImagesOnly")) ? "featured/" : "";
+
+            string url = $"https://source.unsplash.com/{UseFeaturedImagesOnly}{size.Width.ToString("####")}x{size.Height.ToString("####")}/";
+            bool BaseImageOnTimeOfDay =
+                HelperMethods.ParseOrFalse(HelperMethods.GetValueFromVault(vault, nameof(BaseImageOnTimeOfDay)));
+
+            bool searchTermsWereAdded = false;
+            if (BaseImageOnTimeOfDay)
+            {
+                var addition = HelperMethods.GetSearchQueryBasedOnTimeOfDay();
+                url += addition;
+                if (addition != "")
+                {
+                    searchTermsWereAdded = true;
+                }
+            }
+
+            if (!searchTermsWereAdded)
+            {
+                url += "?" + searchTerms;
+            }
+
+            return url;
         }
     }
 }

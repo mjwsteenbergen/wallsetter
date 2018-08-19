@@ -43,25 +43,8 @@ namespace Wallsetter
             await Clean();
 
             PasswordVault vault = new PasswordVault();
-            
 
-            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
-            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
-            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
-
-            var url = HelperMethods.GetValueFromVault(vault, "unsplashWp");
-
-            if (url == null)
-            {
-                url = $"https://source.unsplash.com/{size.Width.ToString("####")}x{size.Height.ToString("####")}/";
-                bool BaseImageOnTimeOfDay =
-                    HelperMethods.ParseOrFalse(HelperMethods.GetValueFromVault(vault, nameof(BaseImageOnTimeOfDay)));
-
-                if (BaseImageOnTimeOfDay)
-                {
-                    url += HelperMethods.GetSearchQueryBasedOnTimeOfDay();
-                }
-            }
+            var url = HelperMethods.GetValueFromVault(vault, "WallpaperUrl") ?? HelperMethods.GetDefaultImageUrl(vault, HelperMethods.GetValueFromVault(vault, "WallpaperSearchTags"));
 
             var storage = await DownloadWallpaper(url, DateTime.Today.ToString("t").Replace(':', '-') + ".jpg");
             await SetWallpaper(storage);
