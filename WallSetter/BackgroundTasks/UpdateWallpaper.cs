@@ -49,8 +49,16 @@ namespace WallSetter.BackgroundTasks
 
             return Task.Run(async () =>
             {
-                await Wallpaper.SetNewWallpaper();
-                await Lockscreen.SetNew();
+                try
+                {
+                    await Wallpaper.SetNewWallpaper();
+                    await Lockscreen.SetNew();
+                }
+                catch (Exception e)
+                {
+
+                }
+                
                 _deferral?.Complete();
             });
         }
