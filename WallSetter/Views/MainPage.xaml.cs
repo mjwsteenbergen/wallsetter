@@ -5,9 +5,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
+using Windows.Foundation;
+using Windows.Graphics.Display;
 using Windows.Security.Credentials;
 using Windows.Storage;
 using Windows.UI.Popups;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using TraktApiSharp.Exceptions;
@@ -153,6 +156,13 @@ namespace WallSetter.Views
                 OnPropertyChanged(credential.UserName);
             }
             trakt = new TraktApi(traktRedirectUrl, traktId, traktSecret);
+
+            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+
+            secrets["WidthAndHeight"] = $"{size.Width:####}x{size.Height:####}";
+            WritePasswords();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -43,39 +43,21 @@ namespace WallSetter.Helpers
                 return "?sunset";
             }
 
-            return "";
+            return null;
         }
 
 
         public static string GetDefaultImageUrl(PasswordVault vault, string searchTerms)
         {
-            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
-            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
-            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
+            var WidthAndHeight = GetValueFromVault(vault, "WidthAndHeight");
 
             var UseFeaturedImagesOnly = HelperMethods.ParseOrFalse(HelperMethods.GetValueFromVault(vault, "UseFeaturedImagesOnly")) ? "featured/" : "";
 
-            string url = $"https://source.unsplash.com/{UseFeaturedImagesOnly}{size.Width.ToString("####")}x{size.Height.ToString("####")}/";
+            string url = $"https://source.unsplash.com/{UseFeaturedImagesOnly}{WidthAndHeight}/";
             bool BaseImageOnTimeOfDay =
                 HelperMethods.ParseOrFalse(HelperMethods.GetValueFromVault(vault, nameof(BaseImageOnTimeOfDay)));
 
-            bool searchTermsWereAdded = false;
-            if (BaseImageOnTimeOfDay)
-            {
-                var addition = HelperMethods.GetSearchQueryBasedOnTimeOfDay();
-                url += addition;
-                if (addition != "")
-                {
-                    searchTermsWereAdded = true;
-                }
-            }
-
-            if (!searchTermsWereAdded)
-            {
-                url += "?" + searchTerms;
-            }
-
-            return url;
+            return url + HelperMethods.GetSearchQueryBasedOnTimeOfDay() ?? searchTerms ?? "";
         }
     }
 }
