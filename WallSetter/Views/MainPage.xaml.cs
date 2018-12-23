@@ -1,168 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using wallsetter.Core;
+using wallsetter.Models;
 using Windows.ApplicationModel.Core;
-using Windows.Foundation;
 using Windows.Graphics.Display;
-using Windows.Security.Credentials;
-using Windows.Storage;
-using Windows.UI.Popups;
+using Windows.UI.Core;
 using Windows.UI.ViewManagement;
-using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using TraktApiSharp.Exceptions;
-using Wallsetter;
-using WallSetter.Helpers;
-using Control = Windows.UI.Xaml.Controls.Control;
 
-namespace WallSetter.Views
+namespace wallsetter.Views
 {
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
-        private TraktApi trakt;
-        private PasswordVault vault;
+        Settings Settings = Settings.GetDefaultSettings();
 
-        public string DefaultImageUrl => HelperMethods.GetDefaultImageUrl(vault, HelperMethods.GetValueFromVault(vault, "LockscreenSearchTags"));
-        public string LockscreenUrl
+        public bool WallpaperUnsplashSelected
         {
-            get => GetFromDictionary(nameof(LockscreenUrl));
+            get => Settings.Wallpaper.ChosenSource == ChosenSource.unsplash;
             set
             {
-                secrets[nameof(LockscreenUrl)] = value;
-                WritePasswords();
+                if (value)
+                {
+                    Settings.Wallpaper.ChosenSource = ChosenSource.unsplash;
+                    SettingsHaveChanged();
+                }
             }
         }
-        public string WallpaperUrl
+        public bool LockscreenUnsplashSelected
         {
-            get => GetFromDictionary(nameof(WallpaperUrl));
+            get => Settings.Lockscreen.ChosenSource == ChosenSource.unsplash;
             set
             {
-                secrets[nameof(WallpaperUrl)] = value;
-                WritePasswords();
+                if (value)
+                {
+                    Settings.Lockscreen.ChosenSource = ChosenSource.unsplash;
+                    SettingsHaveChanged();
+                }
             }
         }
-
-        public string LockscreenSearchTags
+        public bool WallpaperTvShowSelected
         {
-            get => GetFromDictionary(nameof(LockscreenSearchTags));
+            get => Settings.Wallpaper.ChosenSource == ChosenSource.tvshow;
             set
             {
-                secrets[nameof(LockscreenSearchTags)] = value;
-                WritePasswords();
+                if (value)
+                {
+                    Settings.Wallpaper.ChosenSource = ChosenSource.tvshow;
+                    SettingsHaveChanged();
+                }
             }
         }
-        public string WallpaperSearchTags
+        public bool LockscreenTvShowSelected
         {
-            get => GetFromDictionary(nameof(WallpaperSearchTags));
+            get => Settings.Lockscreen.ChosenSource == ChosenSource.tvshow;
             set
             {
-                secrets[nameof(WallpaperSearchTags)] = value;
-                WritePasswords();
+                if (value)
+                {
+                    Settings.Lockscreen.ChosenSource = ChosenSource.tvshow;
+                    SettingsHaveChanged();
+                }
             }
         }
-
-        public string traktId
+        public bool WallpaperUrlSelected
         {
-            get => GetFromDictionary(nameof(traktId));
+            get => Settings.Wallpaper.ChosenSource == ChosenSource.url;
             set
             {
-                secrets[nameof(traktId)] = value;
-                WritePasswords();
+                if (value)
+                {
+                    Settings.Wallpaper.ChosenSource = ChosenSource.url;
+                    SettingsHaveChanged();
+                }
             }
         }
-        public string traktSecret
+        public bool LockscreenUrlSelected
         {
-            get => GetFromDictionary(nameof(traktSecret));
+            get => Settings.Lockscreen.ChosenSource == ChosenSource.url;
             set
             {
-                secrets[nameof(traktSecret)] = value;
-                WritePasswords();
+                if (value)
+                {
+                    Settings.Lockscreen.ChosenSource = ChosenSource.url;
+                    SettingsHaveChanged();
+                }
             }
         }
-        public string traktRedirectUrl
-        {
-            get => GetFromDictionary(nameof(traktRedirectUrl));
-            set
-            {
-                secrets[nameof(traktRedirectUrl)] = value;
-                WritePasswords();
-            }
-        }
-        public string fanartId
-        {
-            get => GetFromDictionary(nameof(fanartId));
-            set
-            {
-                secrets[nameof(fanartId)] = value;
-                WritePasswords();
-            }
-        }
-        public string fanartSecret
-        {
-            get => GetFromDictionary(nameof(fanartSecret));
-            set
-            {
-                secrets[nameof(fanartSecret)] = value;
-                WritePasswords();
-            }
-        }
-        public bool LockscreenShowsToggle
-        {
-            get => HelperMethods.ParseOrFalse(GetFromDictionary(nameof(LockscreenShowsToggle)));
-            set
-            {
-                secrets[nameof(LockscreenShowsToggle)] = value.ToString();
-                WritePasswords();
-            }
-        }
-        public bool BaseImageOnTimeOfDay
-        {
-            get => HelperMethods.ParseOrFalse(GetFromDictionary(nameof(BaseImageOnTimeOfDay)));
-            set
-            {
-                secrets[nameof(BaseImageOnTimeOfDay)] = value.ToString();
-                WritePasswords();
-            }
-        }
-
-        public bool UseFeaturedImagesOnly
-        {
-            get => HelperMethods.ParseOrFalse(GetFromDictionary(nameof(UseFeaturedImagesOnly)));
-            set
-            {
-                secrets[nameof(UseFeaturedImagesOnly)] = value.ToString();
-                WritePasswords();
-            }
-        }
-
-        Dictionary<string, string> secrets = new Dictionary<string, string>(); 
 
         public MainPage()
         {
             InitializeComponent();
-            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
-            coreTitleBar.ExtendViewIntoTitleBar = true;
-            vault = new PasswordVault();
-
-            var logins = vault.RetrieveAll();
-
-            foreach (PasswordCredential credential in logins)
+            Page_Loaded();
+            App.Current.Suspending += async (a, b) =>
             {
-                credential.RetrievePassword();
-                secrets.Add(credential.UserName, credential.Password);
-                OnPropertyChanged(credential.UserName);
-            }
-            trakt = new TraktApi(traktRedirectUrl, traktId, traktSecret);
-
-            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
-            var scaleFactor = DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
-            var size = new Size(bounds.Width * scaleFactor, bounds.Height * scaleFactor);
-
-            secrets["WidthAndHeight"] = $"{size.Width:####}x{size.Height:####}";
-            WritePasswords();
+                var def = b.SuspendingOperation.GetDeferral();
+                await Settings.Save(Settings);
+                def.Complete();
+            };
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -180,94 +117,98 @@ namespace WallSetter.Views
 
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        private void WritePasswords()
+        private async void Page_Loaded()
         {
-            foreach (KeyValuePair<string, string> secret in secrets)
+            // Remove top bar
+            var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
+
+            //GetScreensize
+            var bounds = ApplicationView.GetForCurrentView().VisibleBounds;
+            var scaleFactor = DisplayInformation.GetForCurrentView();
+
+            Settings = await Settings.GetSettings();
+
+            SetTimeSpanOptions(Settings);
+
+            var windowSize = $"{scaleFactor.ScreenWidthInRawPixels}x{scaleFactor.ScreenHeightInRawPixels}";
+            Settings.ScreenSize = windowSize;
+            SettingsHaveChanged();
+        }
+
+        private void SetTimeSpanOptions(Settings settings)
+        {
+            TimeSpanOptions.Items.Clear();
+
+            GetPossibleTimeSpanOptions().ForEach(i => TimeSpanOptions.Items.Add(Format(i)));
+
+            TimeSpanOptions.SelectedItem = Format(TimeSpan.FromMinutes(settings.RunEvery));
+        }
+
+        private string Format(TimeSpan i)
+        {
+            if(i.Days >= 1) {
+                return i.Days > 1 ? i.Days + " days" : "1 day";
+            } else if (i.Hours >= 1)
             {
-                if (secret.Value == "")
-                {
-                    var cred = vault.RetrieveAll().FirstOrDefault(i => i.UserName == secret.Key);
-                    if (cred != null)
-                    {
-                        vault.Remove(cred);
-                    }
-                }
-                else
-                {
-                    vault.Add(new PasswordCredential("wallsetter", secret.Key, secret.Value));
-                }
+                return i.Hours > 1 ? i.Hours + " hours" : "1 hour";
+            } else
+            {
+                return i.Minutes > 1 ? i.Minutes + " minutes" : "1 minute";
             }
         }
 
-        private string GetFromDictionary(string name)
+        private List<TimeSpan> GetPossibleTimeSpanOptions ()
         {
-            if (secrets == null)
+            return new List<TimeSpan>()
             {
-                return "";
-            }
-
-            return secrets.FirstOrDefault(i => i.Key == name).Value ?? "";
+                TimeSpan.FromMinutes(15),
+                TimeSpan.FromMinutes(30),
+                TimeSpan.FromHours(1),
+                TimeSpan.FromHours(2),
+                TimeSpan.FromHours(12),
+                TimeSpan.FromDays(1),
+            };
         }
 
-        private async void ChangeWallpaper(object sender, RoutedEventArgs e)
+        private async void UpdateWallpapers(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            await Wallpaper.SetNewWallpaper();
+            await Settings.Save(Settings);
+            await ImageSetter.UpdateImages(Settings);
         }
 
-        private async void ConnectToTrakt_Click(object sender, RoutedEventArgs e)
+        private void SettingsHaveChanged()
         {
-            try
-            {
-                await trakt.RequestAuth();
-            }
-            catch (Exception exception)
-            {
-                await new MessageDialog(exception.Message).ShowAsync();
-            }
+            OnPropertyChanged(nameof(Settings));
+            OnPropertyChanged(nameof(LockscreenTvShowSelected));
+            OnPropertyChanged(nameof(LockscreenUnsplashSelected));
+            OnPropertyChanged(nameof(LockscreenUrlSelected));
+            OnPropertyChanged(nameof(WallpaperTvShowSelected));
+            OnPropertyChanged(nameof(WallpaperUnsplashSelected));
+            OnPropertyChanged(nameof(WallpaperUrlSelected));
+
         }
 
-        private async void DeleteData(object sender, RoutedEventArgs e)
+        private void Page_Unloaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            await ApplicationData.Current.ClearAsync();
-            vault.RetrieveAll().ToList().ForEach(i => vault.Remove(i));
         }
 
-        private async void ChangeLockscreen(object sender, RoutedEventArgs e)
+        private void ToggleSwitch_Toggled(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            await Lockscreen.SetNew();
+            //OnPropertyChanged(nameof(LockscreenTvShowSelected));
+            //OnPropertyChanged(nameof(LockscreenUnsplashSelected));
+            //OnPropertyChanged(nameof(LockscreenUrlSelected));
+            //OnPropertyChanged(nameof(WallpaperTvShowSelected));
+            //OnPropertyChanged(nameof(WallpaperUnsplashSelected));
+            //OnPropertyChanged(nameof(WallpaperUrlSelected));
         }
 
-        private void OnToggle(object sender, RoutedEventArgs e)
+        private void TimeSpanOptions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ToggleSwitch ts = (sender as ToggleSwitch);
-            if (ts.FocusState == FocusState.Unfocused)
-            {
-                return;
-            }
-            LockscreenShowsToggle = ts.IsOn;
-            OnPropertyChanged(nameof(LockscreenShowsToggle));
-        }
-
-        private void OnToggleBoTOD(object sender, RoutedEventArgs e)
-        {
-            ToggleSwitch ts = (sender as ToggleSwitch);
-            if (ts.FocusState == FocusState.Unfocused)
-            {
-                return;
-            }
-            BaseImageOnTimeOfDay = ts.IsOn;
-            OnPropertyChanged(nameof(BaseImageOnTimeOfDay));
-        }
-
-        private void OnToggleFIO(object sender, RoutedEventArgs e)
-        {
-            ToggleSwitch ts = (sender as ToggleSwitch);
-            if (ts.FocusState == FocusState.Unfocused)
-            {
-                return;
-            }
-            UseFeaturedImagesOnly = ts.IsOn;
-            OnPropertyChanged(nameof(UseFeaturedImagesOnly));
+            string selected = (string) e.AddedItems[0];
+            Settings.RunEvery = Convert.ToUInt32(GetPossibleTimeSpanOptions().Find(i => Format(i) == selected).TotalMinutes);
         }
     }
 }

@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 using Windows.ApplicationModel.Background;
 
-namespace WallSetter.BackgroundTasks
+namespace wallsetter.BackgroundTasks
 {
     public abstract class BackgroundTask
     {
-        public abstract void Register();
+        public abstract Task Register();
 
         public abstract Task RunAsyncInternal(IBackgroundTaskInstance taskInstance);
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 
-namespace WallSetter.Helpers
+namespace wallsetter.Helpers
 {
     internal static class Singleton<T>
         where T : new()

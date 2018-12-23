@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-
+using wallsetter.Core;
+using wallsetter.Models;
 using Windows.ApplicationModel.Background;
 using Windows.System.Threading;
-using Wallsetter;
 
-namespace WallSetter.BackgroundTasks
+namespace wallsetter.BackgroundTasks
 {
-    public sealed class UpdateWallpaper : BackgroundTask
+    public sealed class UpdateScreenImages : BackgroundTask
     {
         public static string Message { get; set; }
 
@@ -16,11 +16,12 @@ namespace WallSetter.BackgroundTasks
         private IBackgroundTaskInstance _taskInstance;
         private BackgroundTaskDeferral _deferral;
 
-        public override void Register()
+        public override async Task Register()
         {
             var taskName = GetType().Name;
+            var taskRegistration = BackgroundTaskRegistration.AllTasks.FirstOrDefault(t => t.Value.Name == taskName).Value;
 
-            if (!BackgroundTaskRegistration.AllTasks.Any(t => t.Value.Name == taskName))
+            if (taskRegistration == null)
             {
                 var builder = new BackgroundTaskBuilder()
                 {
@@ -29,10 +30,9 @@ namespace WallSetter.BackgroundTasks
 
                 // TODO WTS: Define the trigger for your background task and set any (optional) conditions
                 // More details at https://docs.microsoft.com/windows/uwp/launch-resume/create-and-register-an-inproc-background-task
-                builder.SetTrigger(new TimeTrigger(60, false));
-                builder.AddCondition(new SystemCondition(SystemConditionType.UserPresent));
+                builder.SetTrigger(new TimeTrigger((await Settings.GetSettings()).RunEvery, false));
                 builder.AddCondition(new SystemCondition(SystemConditionType.FreeNetworkAvailable));
-                builder.AddCondition(new SystemCondition(SystemConditionType.BackgroundWorkCostNotHigh));
+                builder.AddCondition(new SystemCondition(SystemConditionType.InternetAvailable));
 
                 builder.Register();
             }
@@ -49,48 +49,21 @@ namespace WallSetter.BackgroundTasks
 
             return Task.Run(async () =>
             {
-                try
-                {
-                    await Wallpaper.SetNewWallpaper();
-                    await Lockscreen.SetNew();
-                }
-                catch (Exception e)
-                {
+                var settings = await Settings.GetSettings();
 
-                }
-                
+                await ImageSetter.UpdateImages(settings);
+
                 _deferral?.Complete();
+
             });
         }
 
         public override void OnCanceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
+            _cancelRequested = true;
+
            // TODO WTS: Insert code to handle the cancelation request here.
            // Documentation: https://docs.microsoft.com/windows/uwp/launch-resume/handle-a-cancelled-background-task
-        }
-
-        private void SampleTimerCallback(ThreadPoolTimer timer)
-        {
-            if ((_cancelRequested == false) && (_taskInstance.Progress < 100))
-            {
-                _taskInstance.Progress += 10;
-                Message = $"Background Task {_taskInstance.Task.Name} running";
-            }
-            else
-            {
-                timer.Cancel();
-
-                if (_cancelRequested)
-                {
-                    Message = $"Background Task {_taskInstance.Task.Name} cancelled";
-                }
-                else
-                {
-                    Message = $"Background Task {_taskInstance.Task.Name} finished";
-                }
-
-                _deferral?.Complete();
-            }
         }
     }
 }

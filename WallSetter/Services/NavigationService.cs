@@ -5,7 +5,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
 
-namespace WallSetter.Services
+namespace wallsetter.Services
 {
     public static class NavigationService
     {
@@ -14,6 +14,7 @@ namespace WallSetter.Services
         public static event NavigationFailedEventHandler NavigationFailed;
 
         private static Frame _frame;
+        private static object _lastParamUsed;
 
         public static Frame Frame
         {
@@ -40,16 +41,31 @@ namespace WallSetter.Services
 
         public static bool CanGoForward => Frame.CanGoForward;
 
-        public static void GoBack() => Frame.GoBack();
+        public static bool GoBack()
+        {
+            if (CanGoBack)
+            {
+                Frame.GoBack();
+                return true;
+            }
+
+            return false;
+        }
 
         public static void GoForward() => Frame.GoForward();
 
         public static bool Navigate(Type pageType, object parameter = null, NavigationTransitionInfo infoOverride = null)
         {
             // Don't open the same page multiple times
-            if (Frame.Content?.GetType() != pageType)
+            if (Frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParamUsed)))
             {
-                return Frame.Navigate(pageType, parameter, infoOverride);
+                var navigationResult = Frame.Navigate(pageType, parameter, infoOverride);
+                if (navigationResult)
+                {
+                    _lastParamUsed = parameter;
+                }
+
+                return navigationResult;
             }
             else
             {

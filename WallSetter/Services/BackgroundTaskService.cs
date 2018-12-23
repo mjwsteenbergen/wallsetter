@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-using WallSetter.Activation;
-using WallSetter.BackgroundTasks;
-using WallSetter.Helpers;
+using wallsetter.Activation;
+using wallsetter.BackgroundTasks;
+using wallsetter.Helpers;
 
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Background;
 
-namespace WallSetter.Services
+namespace wallsetter.Services
 {
     internal class BackgroundTaskService : ActivationHandler<BackgroundActivatedEventArgs>
     {
@@ -19,11 +19,20 @@ namespace WallSetter.Services
         private static readonly Lazy<IEnumerable<BackgroundTask>> BackgroundTaskInstances =
             new Lazy<IEnumerable<BackgroundTask>>(() => CreateInstances());
 
-        public void RegisterBackgroundTasks()
+        public async Task RegisterBackgroundTasksAsync()
         {
+            BackgroundExecutionManager.RemoveAccess();
+            var result = await BackgroundExecutionManager.RequestAccessAsync();
+
+            if (result == BackgroundAccessStatus.DeniedBySystemPolicy
+                || result == BackgroundAccessStatus.DeniedByUser)
+            {
+                return;
+            }
+
             foreach (var task in BackgroundTasks)
             {
-                task.Register();
+                await task.Register();
             }
         }
 
@@ -65,7 +74,7 @@ namespace WallSetter.Services
         {
             var backgroundTasks = new List<BackgroundTask>();
 
-            backgroundTasks.Add(new UpdateWallpaper());
+            backgroundTasks.Add(new UpdateScreenImages());
             return backgroundTasks;
         }
     }

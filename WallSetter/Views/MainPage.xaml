@@ -1,109 +1,315 @@
 ﻿<Page
-    x:Class="WallSetter.Views.MainPage"
+    x:Class="wallsetter.Views.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     Style="{StaticResource PageStyle}"
+    Unloaded="Page_Unloaded"
     mc:Ignorable="d">
-    <Page.Resources>
-        <Style x:Key="NoExpanderHeaderStyle" TargetType="ToggleButton">
-            <Setter Property="Background" Value="{ThemeResource AppBarBottomThemePadding}"/>
-        </Style>
-    </Page.Resources>
-
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Image Stretch="UniformToFill" Source="{x:Bind DefaultImageUrl}"></Image>
+    <Grid
+        x:Name="ContentArea">
+        <!--<Image Source="https://images.unsplash.com/photo-1526376043067-5af36c35cd6c?ixlib=rb-1.2.1" Stretch="UniformToFill"/>-->
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.Background>
+                <SolidColorBrush Color="{ThemeResource SystemAccentColorDark1}" Opacity="0.15"/>
+            </Grid.Background>
+            <StackPanel Grid.Row="0" Padding="0,10" Orientation="Horizontal">
+                <StackPanel.Background>
+                    <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.85"/>
+                </StackPanel.Background>
+                <TextBlock Margin="30,0" Text="Wallsetter" Style="{StaticResource HeaderTextBlockStyle}" FontWeight="SemiBold"/>
+                <Button Margin="0,0,30,0" Content="Update" Tapped="UpdateWallpapers"/>
+            </StackPanel>
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl>
 
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.55"/>
+                        </Grid.Background>
+                        <TextBlock Text="General Settings" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold"/>
+                    </Grid>
 
-            <Grid HorizontalAlignment="Center" Grid.Column="0" Grid.Row="1">
-                <StackPanel HorizontalAlignment="Center">
-                    <Button HorizontalAlignment="Center" Margin="10" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ChangeWallpaper">Change background</Button>
-                    <Button Margin="10" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ChangeLockscreen">Change Lockscreen</Button>
-                    <Button Margin="10" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="DeleteData">Delete All My Data</Button>
-                </StackPanel>
-            </Grid>
+                    <StackPanel Padding="30,10">
 
-            <StackPanel Grid.Column="0" Grid.Row="2" Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}">
-                <TextBlock Padding="40,40,0,0" Margin="0,10" Text="Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
-                <Grid Padding="40,0,40,40" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel >
-                        <TextBlock Margin="0,20" Style="{ThemeResource SubtitleTextBlockStyle}" Text="Wallpaper"/>
-                        <TextBlock Text="Change wallpaper based on the time of day"/>
-                        <ToggleSwitch IsOn="{x:Bind BaseImageOnTimeOfDay, Mode=OneWay}" Toggled="OnToggleBoTOD"/>
-                        <TextBlock Text="Only use featured images"/>
-                        <ToggleSwitch IsOn="{x:Bind UseFeaturedImagesOnly, Mode=OneWay}" Toggled="OnToggleFIO"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <TextBlock Margin="0,20" Style="{ThemeResource SubtitleTextBlockStyle}" Text="Search"/>
-                        <TextBox Margin="5" Text="{x:Bind LockscreenSearchTags, Mode=TwoWay}" PlaceholderText="Search tags for lock screen" MinWidth="200" HorizontalAlignment="Left"/>
-                        <TextBox Margin="5" Text="{x:Bind WallpaperSearchTags, Mode=TwoWay}" PlaceholderText="Search tags for wallpaper" MinWidth="200" HorizontalAlignment="Left"/>
-                    </StackPanel>
-                </Grid>
-                <controls:Expander VerticalAlignment="Top"
-                               Header="Advanced Settings"
-                               HorizontalContentAlignment="Stretch"
-                               IsExpanded="False"
-                               Background="{ThemeResource SystemControlBackgroundAltMediumLowBrush}"
-                               ExpandDirection="Up">
-                    <StackPanel Margin="40" Width="Auto"  VerticalAlignment="Center" >
-                        <TextBlock Margin="0,10" Text="Advanced Settings" Style="{ThemeResource SubheaderTextBlockStyle}"/>
+                        <TextBlock Text="Update every"/>
+                        <ComboBox x:Name="TimeSpanOptions" Margin="5" MinWidth="200" PlaceholderText="Length" SelectionChanged="TimeSpanOptions_SelectionChanged">
+                        </ComboBox>
+
+                        <TextBlock Margin="0,10,0,2" Text="Sync the Lockscreen and Wallpaper source"/>
+                        <ToggleSwitch IsOn="{x:Bind Settings.SyncWithOther, Mode=TwoWay}"/>
+
+                        <StackPanel Margin="-30,0" Padding="30,5" Orientation="Horizontal">
+                            <StackPanel.Background>
+                                <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                            </StackPanel.Background>
+                            <TextBlock Text="Series settings" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                        </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <Grid  Height="40" >
-                                    <TextBlock Text="Unsplash" VerticalAlignment="Center" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                                </Grid>
-                                <TextBox Margin="0,5" Text="{x:Bind LockscreenUrl, Mode=TwoWay}" PlaceholderText="Lockscreen Url. Keep empty for default" ></TextBox>
-                                <TextBox Margin="0,5" Text="{x:Bind WallpaperUrl, Mode=TwoWay}" PlaceholderText="Wallpaper Url. Keep empty for default" ></TextBox>
-                                <Button Margin="0,5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Click="ConnectToTrakt_Click">Set Default</Button>
-                            </StackPanel>
-                            <StackPanel Grid.Column="1">
-                                <StackPanel Orientation="Horizontal" Height="40">
-                                    <TextBlock Margin="5,0" VerticalAlignment="Center" Text="Trakt" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                                    <ToggleSwitch IsOn="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Toggled="OnToggle"/>
-                                </StackPanel>
-                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktId, Mode=TwoWay}" PlaceholderText="Trakt Id"></TextBox>
-                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktSecret, Mode=TwoWay}" PlaceholderText="Trakt Secret"></TextBox>
-                                <TextBox Margin="5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind traktRedirectUrl, Mode=TwoWay}" PlaceholderText="Trakt Redirect Url" ></TextBox>
-                                <PasswordBox Margin="5" IsPasswordRevealButtonEnabled="True" x:Name="traktAcessCode" PlaceholderText="AccessCode here" ></PasswordBox>
-                                <Button Margin="5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" IsEnabled="{x:Bind LockscreenShowsToggle}"  Click="ConnectToTrakt_Click">Get TraktCredentials</Button>
+                                <TextBlock Margin="0,5,0,0" VerticalAlignment="Center" Text="Trakt" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBox Margin="0,5,5,0" Text="" PlaceholderText="Trakt Id"></TextBox>
+                                <TextBox Margin="0,5,5,0" Text="" PlaceholderText="Trakt Secret"></TextBox>
+                                <TextBox Margin="0,5,5,0" Text="" PlaceholderText="Trakt Redirect Url" ></TextBox>
+                                <TextBox Margin="0,5,5,0" PlaceholderText="AccessCode here"></TextBox>
+                                <Button Margin="0,5" Background="{ThemeResource SystemControlAcrylicWindowBrush}" Content="Get TraktCredentials"></Button>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <Grid  Height="40" >
-                                    <TextBlock Text="FanArt" VerticalAlignment="Center" Margin="5,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
-                                </Grid>
-                                <TextBox Margin="0,5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartId, Mode=TwoWay}" PlaceholderText="Fanart Project Id"></TextBox>
-                                <TextBox Margin="0,5" IsEnabled="{x:Bind LockscreenShowsToggle, Mode=OneWay}" Text="{x:Bind fanartSecret, Mode=TwoWay}" PlaceholderText="Fanart Project Secret"></TextBox>
+                                <TextBlock Text="FanArt" VerticalAlignment="Center" Margin="0,5,0,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBox Margin="0,5,0,0" Text="" PlaceholderText="Fanart Project Id"></TextBox>
+                                <TextBox Margin="0,5,0,0" Text="" PlaceholderText="Fanart Project Secret"></TextBox>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
-                </controls:Expander>
-            </StackPanel>
+
+                    <Grid Padding="30,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.75"/>
+                        </Grid.Background>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="Wallpaper" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,30,0"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.IsEnabled, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <TextBlock Text="Lockscreen" Style="{StaticResource SubheaderTextBlockStyle}" FontWeight="SemiBold" Margin="0,0,30,0"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.IsEnabled, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.55"/>
+                        </Grid.Background>
+                        <TextBlock Text="ImageSources" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Padding="30,5">
+                            <StackPanel.Background>
+                                <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                            </StackPanel.Background>
+                            <TextBlock Text="Unsplash" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind WallpaperUnsplashSelected, Mode=TwoWay}" Toggled="ToggleSwitch_Toggled"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <StackPanel.Background>
+                                <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                            </StackPanel.Background>
+                            <TextBlock Text="Unsplash" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind LockscreenUnsplashSelected, Mode=TwoWay}" Toggled="ToggleSwitch_Toggled"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
 
 
+
+                            <TextBlock Margin="0,10,0,2" Text="Search Keywords"/>
+                            <TextBox Text="{x:Bind Settings.Wallpaper.UnsplashSettings.SearchKeywords, Mode=TwoWay}" PlaceholderText="Leave empty for none" Width="300" HorizontalAlignment="Left"/>
+
+                            <TextBlock Margin="0,10,0,2" Text="Only use featured images"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.UnsplashSettings.OnlyUseFeatured, Mode=TwoWay}"/>
+
+                            <TextBlock Margin="0,10,0,2" Text="Change image based on time of day"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.UnsplashSettings.ChangeOnTimeOfDay, Mode=TwoWay}"/>
+
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Margin="0,10,0,2" Text="Search Keywords"/>
+                            <TextBox Text="{x:Bind Settings.Lockscreen.UnsplashSettings.SearchKeywords, Mode=TwoWay}" PlaceholderText="Leave empty for none" Width="300" HorizontalAlignment="Left"/>
+
+                            <TextBlock Margin="0,10,0,2" Text="Only use featured images"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.UnsplashSettings.OnlyUseFeatured, Mode=TwoWay}"/>
+
+                            <TextBlock Margin="0,10,0,2" Text="Change image based on time of day"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.UnsplashSettings.ChangeOnTimeOfDay, Mode=TwoWay}"/>
+
+                        </StackPanel>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal" Padding="30,5">
+                            <StackPanel.Background>
+                                <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                            </StackPanel.Background>
+                            <TextBlock Text="Image from url" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind WallpaperUrlSelected, Mode=TwoWay}" Toggled="ToggleSwitch_Toggled"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <StackPanel.Background>
+                                <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                            </StackPanel.Background>
+                            <TextBlock Text="Image from url" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind LockscreenUrlSelected, Mode=TwoWay}" Toggled="ToggleSwitch_Toggled"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="30,0,30,30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Margin="0,10,0,2" Text="Url"/>
+                            <TextBox Text="{x:Bind Settings.Wallpaper.ImageUrl, Mode=TwoWay}" PlaceholderText="Leave empty for none" Width="300" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Margin="0,10,0,2" Text="Url"/>
+                            <TextBox Text="{x:Bind Settings.Wallpaper.ImageUrl, Mode=TwoWay}" PlaceholderText="Leave empty for none" Width="300" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5" Margin="0,0,0,3">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="TV-Shows" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind WallpaperTvShowSelected, Mode=TwoWay}" Toggled="ToggleSwitch_Toggled"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="TV-Shows" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind LockscreenTvShowSelected, Mode=TwoWay}" Toggled="ToggleSwitch_Toggled"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.55"/>
+                        </Grid.Background>
+                        <TextBlock Text="Effects" Style="{StaticResource TitleTextBlockStyle}" FontWeight="SemiBold"/>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Black and White" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.ImageEffects.BlacknWhite, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="Black and White" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.ImageEffects.BlacknWhite, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Blur" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.ImageEffects.Blur, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="Blur" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.ImageEffects.Blur, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.ImageEffects.Glow, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="Glow" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.ImageEffects.Glow, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="OilPainting" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.ImageEffects.OilPaint, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="OilPainting" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.ImageEffects.OilPaint, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Polaroid" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.ImageEffects.Polaroid, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="Polaroid" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.ImageEffects.Polaroid, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Padding="30,5">
+                        <Grid.Background>
+                            <SolidColorBrush Color="{ThemeResource SystemAccentColor}" Opacity="0.25"/>
+                        </Grid.Background>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Sepia" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Wallpaper.ImageEffects.Sepia, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Grid.Column="1">
+                            <TextBlock Text="Sepia" VerticalAlignment="Center" Margin="0,0,10,0" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <ToggleSwitch IsOn="{x:Bind Settings.Lockscreen.ImageEffects.Sepia, Mode=TwoWay}"/>
+                        </StackPanel>
+                    </Grid>
+                </ItemsControl>
+            </ScrollViewer>
 
         </Grid>
-        <TextBlock Margin="50" Style="{ThemeResource PageTitleStyle}" VerticalAlignment="Top">Wallsetter</TextBlock>
-
     </Grid>
 </Page>

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using WallSetter.Services;
+using wallsetter.Services;
 
 using Windows.ApplicationModel.Activation;
 
-namespace WallSetter.Activation
+namespace wallsetter.Activation
 {
     internal class DefaultLaunchActivationHandler : ActivationHandler<LaunchActivatedEventArgs>
     {

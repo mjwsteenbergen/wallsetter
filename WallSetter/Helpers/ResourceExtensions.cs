@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 using Windows.ApplicationModel.Resources;
 
-namespace WallSetter.Helpers
+namespace wallsetter.Helpers
 {
     internal static class ResourceExtensions
     {
