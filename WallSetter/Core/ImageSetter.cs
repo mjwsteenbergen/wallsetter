@@ -29,7 +29,7 @@ namespace wallsetter.Core
                     originalImage = wallpaperImage.Clone();
                 }
 
-                StorageFile file = await Save(ApplyEffects(wallpaperImage, settings.Wallpaper.ImageEffects), "wallpaper.jpg");
+                StorageFile file = await Save(ApplyEffects(wallpaperImage, settings.Wallpaper.ImageEffects, settings.Wallpaper.UnsplashSettings.ChangeOnTimeOfDay), "wallpaper.jpg");
                 await UserProfilePersonalizationSettings.Current.TrySetWallpaperImageAsync(file);
             }
 
@@ -46,13 +46,13 @@ namespace wallsetter.Core
                     lockscreenimage = await ImageDownloader.DownloadNewImage(settings.Lockscreen, settings.ScreenSize);
                 }
 
-                StorageFile file = await Save(ApplyEffects(lockscreenimage, settings.Lockscreen.ImageEffects), "lockscreen.jpg");
+                StorageFile file = await Save(ApplyEffects(lockscreenimage, settings.Lockscreen.ImageEffects, settings.Lockscreen.UnsplashSettings.ChangeOnTimeOfDay), "lockscreen.jpg");
                 await UserProfilePersonalizationSettings.Current.TrySetLockScreenImageAsync(file);
             }
 
         }
 
-        private static Image<Rgba32> ApplyEffects(Image<Rgba32> image, ImageEffects settings)
+        private static Image<Rgba32> ApplyEffects(Image<Rgba32> image, ImageEffects settings, bool changeOnTimeOfDay)
         {
             if (settings.Blur)
             {
@@ -84,7 +84,11 @@ namespace wallsetter.Core
                 image.Mutate(i => i.Sepia());
             }
 
-
+            int hour = DateTime.Now.Hour;
+            if (changeOnTimeOfDay && (hour < 8 || hour > 21))
+            {
+                image.Mutate(i => i.Brightness(0.3f));
+            }
 
             return image;
         }

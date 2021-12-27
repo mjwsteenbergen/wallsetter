@@ -54,12 +54,13 @@ namespace wallsetter.Core
                 return null;
             }
 
-            int hour = DateTime.Now.Hour;
-            if (hour < 8 || hour > 21)
-            {
-                return "?" + new List<string> { "night", "space", "star", "galaxy", "astrophotography", "milky way" }.Shuffle().First();
-            }
+            //int hour = DateTime.Now.Hour;
+            //if (hour < 8 || hour > 21)
+            //{
+            //    return "?" + new List<string> { "night", "space", "star", "galaxy", "astrophotography", "milky way" }.Shuffle().First();
+            //}
 
+            int hour = DateTime.Now.Hour;
             if (hour == 8)
             {
                 return "?sunrise";
